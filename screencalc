@@ -1,0 +1,209 @@
+#!/usr/bin/python3
+#+
+# Calculator for screen parameters. Given any two of
+# the first four, it will calculate the rest:
+#
+#     screen width (in/cm)
+#     screen height (in/cm)
+#     screen diagonal (in/cm)
+#     aspect ratio
+#     pixel density
+#     screen width in pixels
+#     screen height in pixels
+#
+# Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+#-
+
+import sys
+from functools import \
+    reduce
+import math
+import fractions
+import re
+import getopt
+
+aspect_figures = 2
+cm_per_in = 2.54
+
+def parse_aspect(s) :
+    num, denom = s.split(":", 1)
+    return \
+        fractions.Fraction(int(num), int(denom))
+#end parse_aspect
+
+def parse_int(s) :
+    return int(s)
+#end parse_int
+
+def parse_density(s) :
+    return int(s) / cm_per_in
+#end parse_density
+
+def parse_measure(s) :
+    amt = re.match(r"([\d\.]+)", s)
+    units = s[amt.end(1):].lower()
+    amt = float(amt.group(1))
+    if units == "cm" :
+        factor = 1.0
+    elif units == "mm" :
+        factor = 0.1
+    elif units == "m" :
+        factor = 0.01
+    elif units == "in" :
+        factor = cm_per_in
+    else :
+        raise getopt.GetoptError("unrecognized units “%s”" % units)
+    #end if
+    return \
+        amt * factor
+#end parse_measure
+
+aspect_diag = lambda f : math.sqrt(f.numerator * f.numerator + f.denominator * f.denominator)
+
+paramdefs = \
+    { # keys are parameter names, values are dictionaries with following keys:
+      #     "parse" : function to parse command-line string to value
+      #     "calculate" : dictionary of ways to calculate parameter from other known parameters
+        "aspect" :
+            {
+                "parse" : parse_aspect,
+                "calculate" :
+                    {
+                        ("heightpx", "widthpx") : lambda h, w : fractions.Fraction(h, w).limit_denominator(10 ** aspect_figures),
+                    },
+            },
+        "density" :
+            {
+                "parse" : parse_density,
+                "calculate" :
+                    {
+                        ("height", "heightpx") : lambda h, p : p / h,
+                        ("width", "widthpx") : lambda w, p : p / w,
+                    },
+                "density" : True,
+            },
+        "diagonal" :
+            {
+                "parse" : parse_measure,
+                "calculate" :
+                    {
+                        ("aspect", "height") : lambda a, h : h / a.numerator * aspect_diag(a),
+                        ("aspect", "width") : lambda a, w : w / a.denominator * aspect_diag(a),
+                        ("height", "width") : lambda h, w : math.sqrt(h * h + w * w),
+                    },
+                "measure" : True,
+            },
+        "height" :
+            {
+                "parse" : parse_measure,
+                "calculate" :
+                    {
+                        ("aspect", "diagonal") : lambda a, d : d / aspect_diag(a) * a.numerator,
+                        ("density", "heightpx") : lambda d, h : h / d,
+                        ("diagonal", "width") : lambda d, w : math.sqrt(d * d - w * w),
+                    },
+                "measure" : True,
+            },
+        "heightpx" :
+            {
+                "parse" : parse_int,
+                "calculate" :
+                    {
+                        ("density", "height") : lambda d, h : int(h * d),
+                    },
+            },
+        "width" :
+            {
+                "parse" : parse_measure,
+                "calculate" :
+                    {
+                        ("aspect", "diagonal") : lambda a, d : d / aspect_diag(a) * a.denominator,
+                        ("density", "widthpx") : lambda d, w : w / d,
+                        ("diagonal", "height") : lambda d, h : math.sqrt(d * d - h * h),
+                    },
+                "measure" : True,
+            },
+        "widthpx" :
+            {
+                "parse" : parse_int,
+                "calculate" :
+                    {
+                        ("density", "width") : lambda d, w : int(w * d),
+                    },
+            },
+    }
+
+opts, args = getopt.getopt \
+  (
+    sys.argv[1:],
+    "",
+    list(k + "=" for k in paramdefs)
+  )
+if len(args) != 0 :
+    raise getopt.GetoptError("not expecting any args")
+#end if
+params = dict((k, None) for k in paramdefs) # None indicates unspecified parameter value
+for keyword, value in opts :
+    if keyword.startswith("--") :
+        param = keyword[2:]
+        params[param] = paramdefs[param]["parse"](value)
+    #end if
+#end for
+while True :
+    # try to calculate all remaining unspecified parameter values
+    did_one = False
+    undone = set()
+    for param in params :
+        if params[param] == None :
+            calculate = paramdefs[param]["calculate"]
+            trycalc = iter(calculate.keys())
+            while True :
+                # try next way to calculate parameter value
+                trythis = next(trycalc, None)
+                if trythis == None :
+                    # run out of ways
+                    undone.add(param)
+                    break
+                #end if
+                if (
+                    reduce
+                      (
+                        lambda a, b : a and b,
+                        (params[k] != None for k in trythis),
+                        True
+                      )
+                ) :
+                    # have all values needed to use this calculation
+                    params[param] = calculate[trythis](*tuple(params[k] for k in trythis))
+                    did_one = True
+                    break
+                #end if
+            #end while
+        #end if
+    #end for
+    if len(undone) == 0 :
+        # all done
+        break
+    if not did_one :
+        # can't make further progress
+        raise RuntimeError("can’t figure out %s" % ",".join(undone))
+    #end if
+#end while
+for param in sorted(params.keys()) :
+    # show all values
+    paramdef = paramdefs[param]
+    val = params[param]
+    if type(val) == int :
+        sval = str(val)
+    elif type(val) == fractions.Fraction :
+        sval = "%d:%d" % (val.numerator, val.denominator)
+    else :
+        sval = "%.3f" % val
+    #end if
+    if paramdef.get("measure", False) :
+        sval += "cm (%.3f in)" % (val / cm_per_in)
+    elif paramdef.get("density", False) :
+        sval += "dpcm (%d dpi)" % int(val * cm_per_in)
+    #end if
+    sys.stdout.write("%s = %s\n" % (param, sval))
+#end for
