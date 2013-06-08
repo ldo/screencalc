@@ -1,15 +1,20 @@
 #!/usr/bin/python3
 #+
-# Calculator for screen parameters. Given any two of
-# the first four, it will calculate the rest:
+# Calculator for screen parameters. Given any of the following,
+# it will try to calculate the rest:
 #
-#     screen width (in/cm)
-#     screen height (in/cm)
-#     screen diagonal (in/cm)
-#     aspect ratio
-#     pixel density
-#     screen width in pixels
-#     screen height in pixels
+#     --aspect=m:n
+#          aspect ratio, m and n integers, m being relative height, n relative width
+#     --density=d
+#          pixel density in integer dots per inch
+#     --diagonal=s
+#     --height=s
+#     --width=s
+#          screen diagonal, width, height, s being a number suffixed by either
+#          “cm” or “in”.
+#     --heightpx=n
+#     --widthpx=n
+#          screen height, width in integer pixels
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 #-
@@ -182,11 +187,10 @@ while True :
         #end if
     #end for
     if len(undone) == 0 :
-        # all done
-        break
+        break # all done
     if not did_one :
         # can't make further progress
-        raise RuntimeError("can’t figure out %s" % ",".join(undone))
+        raise RuntimeError("can’t figure out %s" % ",".join(sorted(undone)))
     #end if
 #end while
 for param in sorted(params.keys()) :
