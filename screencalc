@@ -39,20 +39,25 @@ aspect_figures = 2
 cm_per_in = 2.54
 
 def parse_aspect(s) :
+    # parses a string of two decimal integers separated by a colon into a Fraction.
     num, denom = s.split(":", 1)
     return \
         Fraction(int(num), int(denom))
 #end parse_aspect
 
 def parse_int(s) :
+    # parses a decimal integer string.
     return int(s)
 #end parse_int
 
 def parse_density(s) :
+    # interprets a number as dpi, returning the corresponding dpcm value.
     return int(s) / cm_per_in
 #end parse_density
 
 def parse_measure(s) :
+    # parses a a distance measure, accepting various unit suffixes,
+    # returning the corresponding value in cm.
     amt = re.match(r"([\d\.]+)", s)
     units = s[amt.end(1):].lower()
     amt = float(amt.group(1))
@@ -77,6 +82,9 @@ paramdefs = \
     { # keys are parameter names, values are dictionaries with following keys:
       #     "parse" : function to parse command-line string to value
       #     "calculate" : dictionary of ways to calculate parameter from other known parameters
+      #          each key is a tuple of names of parameters which are known
+      #              (ordered alphabetically, but this is not essential)
+      #          corresponding value is a function of those parameter values in the same order
         "aspect" :
             {
                 "parse" : parse_aspect,
