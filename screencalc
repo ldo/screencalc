@@ -23,7 +23,8 @@ import sys
 from functools import \
     reduce
 import math
-import fractions
+from fractions import \
+    Fraction
 import re
 import getopt
 
@@ -33,7 +34,7 @@ cm_per_in = 2.54
 def parse_aspect(s) :
     num, denom = s.split(":", 1)
     return \
-        fractions.Fraction(int(num), int(denom))
+        Fraction(int(num), int(denom))
 #end parse_aspect
 
 def parse_int(s) :
@@ -74,7 +75,7 @@ paramdefs = \
                 "parse" : parse_aspect,
                 "calculate" :
                     {
-                        ("heightpx", "widthpx") : lambda h, w : fractions.Fraction(h, w).limit_denominator(10 ** aspect_figures),
+                        ("heightpx", "widthpx") : lambda h, w : Fraction(h, w).limit_denominator(10 ** aspect_figures),
                     },
             },
         "density" :
@@ -199,7 +200,7 @@ for param in sorted(params.keys()) :
     val = params[param]
     if type(val) == int :
         sval = str(val)
-    elif type(val) == fractions.Fraction :
+    elif type(val) == Fraction :
         sval = "%d:%d" % (val.numerator, val.denominator)
     else :
         sval = "%.3f" % val
