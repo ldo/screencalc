@@ -19,8 +19,8 @@
 #
 # Combinations which will work are:
 #     * any 2 of (aspect, diagonal, height, width) plus any 1 of (density, heightpx, widthpx)
+#     * aspect + density + (heightpx or widthpx)
 #     * all 3 of (density, heightpx, widthpx)
-#     * possibly others
 # Discrepancies are not checked if you overspecify.
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
