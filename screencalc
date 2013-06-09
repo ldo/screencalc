@@ -65,7 +65,7 @@ def parse_measure(s) :
         amt * factor
 #end parse_measure
 
-aspect_diag = lambda f : math.sqrt(f.numerator * f.numerator + f.denominator * f.denominator)
+aspect_diag = lambda f : math.hypot(f.numerator, f.denominator)
 
 paramdefs = \
     { # keys are parameter names, values are dictionaries with following keys:
@@ -96,7 +96,7 @@ paramdefs = \
                     {
                         ("aspect", "height") : lambda a, h : h / a.numerator * aspect_diag(a),
                         ("aspect", "width") : lambda a, w : w / a.denominator * aspect_diag(a),
-                        ("height", "width") : lambda h, w : math.sqrt(h * h + w * w),
+                        ("height", "width") : lambda h, w : math.hypot(h, w),
                     },
                 "measure" : True,
             },
