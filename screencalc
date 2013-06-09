@@ -3,8 +3,9 @@
 # Calculator for screen parameters. Given any of the following,
 # it will try to calculate the rest:
 #
-#     --aspect=m:n
-#          aspect ratio, m and n integers, m being relative height, n relative width
+#     --aspect=h:w
+#          aspect ratio, h and w integers, h being relative height, w relative width
+#          e.g. widescreen landscape is 9:16, widescreen portrait is 16:9
 #     --density=d
 #          pixel density in integer dots per inch
 #     --diagonal=s
