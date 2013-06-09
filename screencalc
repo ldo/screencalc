@@ -96,7 +96,7 @@ paramdefs = \
                     {
                         ("aspect", "height") : lambda a, h : h / a.numerator * aspect_diag(a),
                         ("aspect", "width") : lambda a, w : w / a.denominator * aspect_diag(a),
-                        ("height", "width") : lambda h, w : math.hypot(h, w),
+                        ("height", "width") : math.hypot,
                     },
                 "measure" : True,
             },
