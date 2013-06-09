@@ -17,6 +17,13 @@
 #     --widthpx=n
 #          screen height, width in integer pixels
 #
+# Combinations which will work are:
+#     * any 2 of (aspect, diagonal, height, width) plus any 1 of (density, heightpx, widthpx)
+#     * aspect plus ((height and heightpx) or (width and widthpx))
+#     * all 3 of (density, heightpx, widthpx)
+#     * possibly others
+# Discrepancies are not checked if you overspecify.
+#
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 #-
 
