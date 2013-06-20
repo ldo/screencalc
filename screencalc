@@ -90,6 +90,7 @@ paramdefs = \
                 "parse" : parse_aspect,
                 "calculate" :
                     {
+                        ("height", "width") : lambda h, w : Fraction(round(h * 10 ** aspect_figures), round(w * 10 ** aspect_figures)).limit_denominator(10 ** aspect_figures),
                         ("heightpx", "widthpx") : lambda h, w : Fraction(h, w).limit_denominator(10 ** aspect_figures),
                     },
             },
