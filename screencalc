@@ -203,28 +203,29 @@ while True :
             #end while
         #end if
     #end for
-    if len(undone) == 0 :
-        break # all done
-    if not did_one :
-        # can't make further progress
-        raise RuntimeError("can’t figure out %s" % ",".join(sorted(undone)))
-    #end if
+    if len(undone) == 0 or not did_one :
+        break # all done, or can't make further progress
 #end while
 for param in sorted(params.keys()) :
-    # show all values
+    # show all known values
     paramdef = paramdefs[param]
     val = params[param]
-    if type(val) == int :
-        sval = str(val)
-    elif type(val) == Fraction :
-        sval = "%d:%d" % (val.numerator, val.denominator)
-    else :
-        sval = "%.3f" % val
+    if val != None :
+        if type(val) == int :
+            sval = str(val)
+        elif type(val) == Fraction :
+            sval = "%d:%d" % (val.numerator, val.denominator)
+        else :
+            sval = "%.3f" % val
+        #end if
+        if paramdef.get("measure", False) :
+            sval += "cm (%.3f in)" % (val / cm_per_in)
+        elif paramdef.get("density", False) :
+            sval += "dpcm (%d dpi)" % int(val * cm_per_in)
+        #end if
+        sys.stdout.write("%s = %s\n" % (param, sval))
     #end if
-    if paramdef.get("measure", False) :
-        sval += "cm (%.3f in)" % (val / cm_per_in)
-    elif paramdef.get("density", False) :
-        sval += "dpcm (%d dpi)" % int(val * cm_per_in)
-    #end if
-    sys.stdout.write("%s = %s\n" % (param, sval))
 #end for
+if len(undone) != 0 :
+    sys.stdout.write("can’t figure out %s\n" % ",".join(sorted(undone)))
+#end if
