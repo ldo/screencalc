@@ -121,6 +121,7 @@ paramdefs = \
                 "calculate" :
                     {
                         ("aspect", "diagonal") : lambda a, d : d / aspect_diag(a) * a.numerator,
+                        ("aspect", "width") : lambda a, w : w / a.denominator * a.numerator,
                         ("density", "heightpx") : lambda d, h : h / d,
                         ("diagonal", "width") : lambda d, w : math.sqrt(d * d - w * w),
                     },
@@ -131,6 +132,7 @@ paramdefs = \
                 "parse" : parse_int,
                 "calculate" :
                     {
+                        ("aspect", "widthpx") : lambda a, w : w / a.denominator * a.numerator,
                         ("density", "height") : lambda d, h : int(h * d),
                     },
             },
@@ -140,6 +142,7 @@ paramdefs = \
                 "calculate" :
                     {
                         ("aspect", "diagonal") : lambda a, d : d / aspect_diag(a) * a.denominator,
+                        ("aspect", "height") : lambda a, h : h / a.numerator * a.denominator,
                         ("density", "widthpx") : lambda d, w : w / d,
                         ("diagonal", "height") : lambda d, h : math.sqrt(d * d - h * h),
                     },
@@ -150,6 +153,7 @@ paramdefs = \
                 "parse" : parse_int,
                 "calculate" :
                     {
+                        ("aspect", "heightpx") : lambda a, h : h / a.numerator * a.denominator,
                         ("density", "width") : lambda d, w : int(w * d),
                     },
             },
