@@ -8,6 +8,9 @@
 #          e.g. widescreen landscape is 9:16, widescreen portrait is 16:9
 #     --density=d
 #          pixel density, in either dpi or dpcm, defaults to dpi.
+#     --distance=s
+#          optimal viewing distance below which individual pixels become visible,
+#          assuming normal human visual acuity of one pixel per arc-minute.
 #     --diagonal=s
 #     --height=s
 #     --width=s
@@ -18,9 +21,10 @@
 #          screen height, width in integer pixels
 #
 # Combinations which will work are:
-#     * any 2 of (aspect, diagonal, height, width) plus any 1 of (density, heightpx, widthpx)
-#     * aspect + density + (heightpx or widthpx)
-#     * all 3 of (density, heightpx, widthpx)
+#     * any 2 of (aspect, diagonal, height, width) plus any 1 of
+#       (density, distance, heightpx, widthpx)
+#     * aspect + (density or distance) + (heightpx or widthpx)
+#     * both of (heightpx, widthpx) and one of (density, distance)
 # Discrepancies are not checked if you overspecify.
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
@@ -37,6 +41,7 @@ import getopt
 
 aspect_figures = 2
 cm_per_in = 2.54
+pixel_angle = math.pi / 180 / 60 # one arc-minute in radians
 
 def parse_measure(s, acceptable_units, default_unit = None) :
     # general routine for parsing a number suffixed by a unit specification.
@@ -132,6 +137,7 @@ paramdefs = \
                 "parse" : parse_density,
                 "calculate" :
                     {
+                        ("distance",) : lambda d : 1 / (d * math.tan(pixel_angle)),
                         ("height", "heightpx") : lambda h, p : p / h,
                         ("width", "widthpx") : lambda w, p : p / w,
                     },
@@ -145,6 +151,15 @@ paramdefs = \
                         ("aspect", "height") : lambda a, h : h / a.numerator * aspect_diag(a),
                         ("aspect", "width") : lambda a, w : w / a.denominator * aspect_diag(a),
                         ("height", "width") : math.hypot,
+                    },
+                "measure" : True,
+            },
+        "distance" :
+            {
+                "parse" : parse_distance,
+                "calculate" :
+                    {
+                        ("density",) : lambda s : 1 / (math.tan(pixel_angle) * s),
                     },
                 "measure" : True,
             },
