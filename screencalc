@@ -7,7 +7,7 @@
 #          aspect ratio, h and w integers, h being relative height, w relative width
 #          e.g. widescreen landscape is 9:16, widescreen portrait is 16:9
 #     --density=d
-#          pixel density in integer dots per inch
+#          pixel density, in either dpi or dpcm, defaults to dpi.
 #     --diagonal=s
 #     --height=s
 #     --width=s
@@ -38,6 +38,32 @@ import getopt
 aspect_figures = 2
 cm_per_in = 2.54
 
+def parse_measure(s, acceptable_units, default_unit = None) :
+    # general routine for parsing a number suffixed by a unit specification.
+    # acceptable_units is a dict mapping valid unit suffixes to corresponding
+    # multiplication factors, which will be applied to the numeric part
+    # of s before returning its value. If no unit suffix is found and
+    # default_unit is not None, then the factor in acceptable_units corresponding
+    # to default_unit will be applied. If there is no unit suffix and no
+    # default_unit, then an error is raised.
+    amt = re.match(r"([\d\.]+)", s)
+    units = s[amt.end(1):].lower()
+    amt = float(amt.group(1))
+    if units != "" :
+        if units in acceptable_units :
+            factor = acceptable_units[units]
+        else :
+            raise getopt.GetoptError("unrecognized units “%s”" % units)
+        #end if
+    elif default_unit != None :
+        factor = acceptable_units[default_unit]
+    else :
+        raise getopt.GetoptError("missing units: “%s”" % s)
+    #end if
+    return \
+        amt * factor
+#end parse_measure
+
 def parse_aspect(s) :
     # parses a string of two decimal integers separated by a colon into a Fraction.
     num, denom = s.split(":", 1)
@@ -51,30 +77,37 @@ def parse_int(s) :
 #end parse_int
 
 def parse_density(s) :
-    # interprets a number as dpi, returning the corresponding dpcm value.
-    return int(s) / cm_per_in
+    # interprets a density specification, returning the corresponding dpcm value.
+    return \
+        parse_measure \
+          (
+            s = s,
+            acceptable_units =
+                {
+                    "dpi" : 1 / cm_per_in,
+                    "dpcm" : 1,
+                    "dpm" : 0.01,
+                },
+            default_unit = "dpi"
+          )
 #end parse_density
 
-def parse_measure(s) :
+def parse_distance(s) :
     # parses a a distance measure, accepting various unit suffixes,
     # returning the corresponding value in cm.
-    amt = re.match(r"([\d\.]+)", s)
-    units = s[amt.end(1):].lower()
-    amt = float(amt.group(1))
-    if units == "cm" :
-        factor = 1.0
-    elif units == "mm" :
-        factor = 0.1
-    elif units == "m" :
-        factor = 0.01
-    elif units == "in" :
-        factor = cm_per_in
-    else :
-        raise getopt.GetoptError("unrecognized units “%s”" % units)
-    #end if
     return \
-        amt * factor
-#end parse_measure
+        parse_measure \
+          (
+            s = s,
+            acceptable_units =
+                {
+                    "cm" : 1.0,
+                    "mm" : 0.1,
+                    "m" : 0.01,
+                    "in" : cm_per_in,
+                }
+          )
+#end parse_distance
 
 aspect_diag = lambda f : math.hypot(f.numerator, f.denominator)
 
@@ -106,7 +139,7 @@ paramdefs = \
             },
         "diagonal" :
             {
-                "parse" : parse_measure,
+                "parse" : parse_distance,
                 "calculate" :
                     {
                         ("aspect", "height") : lambda a, h : h / a.numerator * aspect_diag(a),
@@ -117,7 +150,7 @@ paramdefs = \
             },
         "height" :
             {
-                "parse" : parse_measure,
+                "parse" : parse_distance,
                 "calculate" :
                     {
                         ("aspect", "diagonal") : lambda a, d : d / aspect_diag(a) * a.numerator,
@@ -138,7 +171,7 @@ paramdefs = \
             },
         "width" :
             {
-                "parse" : parse_measure,
+                "parse" : parse_distance,
                 "calculate" :
                     {
                         ("aspect", "diagonal") : lambda a, d : d / aspect_diag(a) * a.denominator,
