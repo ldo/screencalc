@@ -103,7 +103,7 @@ def parse_distance(s) :
                 {
                     "cm" : 1.0,
                     "mm" : 0.1,
-                    "m" : 0.01,
+                    "m" : 100,
                     "in" : cm_per_in,
                 }
           )
