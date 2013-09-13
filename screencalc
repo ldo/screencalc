@@ -152,7 +152,7 @@ paramdefs = \
                         ("aspect", "width") : lambda a, w : w / a.denominator * aspect_diag(a),
                         ("height", "width") : math.hypot,
                     },
-                "measure" : True,
+                "distance" : True,
             },
         "distance" :
             {
@@ -161,7 +161,7 @@ paramdefs = \
                     {
                         ("density",) : lambda s : 1 / (math.tan(pixel_angle) * s),
                     },
-                "measure" : True,
+                "distance" : True,
             },
         "height" :
             {
@@ -173,7 +173,7 @@ paramdefs = \
                         ("density", "heightpx") : lambda d, h : h / d,
                         ("diagonal", "width") : lambda d, w : math.sqrt(d * d - w * w),
                     },
-                "measure" : True,
+                "distance" : True,
             },
         "heightpx" :
             {
@@ -194,7 +194,7 @@ paramdefs = \
                         ("density", "widthpx") : lambda d, w : w / d,
                         ("diagonal", "height") : lambda d, h : math.sqrt(d * d - h * h),
                     },
-                "measure" : True,
+                "distance" : True,
             },
         "widthpx" :
             {
@@ -270,7 +270,7 @@ for param in sorted(params.keys()) :
         else :
             sval = "%.3f" % val
         #end if
-        if paramdef.get("measure", False) :
+        if paramdef.get("distance", False) :
             sval += "cm (%.3f in)" % (val / cm_per_in)
         elif paramdef.get("density", False) :
             sval += "dpcm (%d dpi)" % int(val * cm_per_in)
