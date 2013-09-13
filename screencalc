@@ -43,6 +43,9 @@ aspect_figures = 2
 cm_per_in = 2.54
 pixel_angle = math.pi / 180 / 60 # one arc-minute in radians
 
+acuity_factor = math.sqrt(2) / math.tan(pixel_angle)
+  # sqrt(2) comes in to account for greater pixel spacing diagonally
+
 def parse_measure(s, acceptable_units, default_unit = None) :
     # general routine for parsing a number suffixed by a unit specification.
     # acceptable_units is a dict mapping valid unit suffixes to corresponding
@@ -137,7 +140,7 @@ paramdefs = \
                 "parse" : parse_density,
                 "calculate" :
                     {
-                        ("distance",) : lambda d : 1 / (d * math.tan(pixel_angle)),
+                        ("distance",) : lambda d : acuity_factor / d,
                         ("height", "heightpx") : lambda h, p : p / h,
                         ("width", "widthpx") : lambda w, p : p / w,
                     },
@@ -159,7 +162,7 @@ paramdefs = \
                 "parse" : parse_distance,
                 "calculate" :
                     {
-                        ("density",) : lambda s : 1 / (math.tan(pixel_angle) * s),
+                        ("density",) : lambda s : acuity_factor / s,
                     },
                 "distance" : True,
             },
