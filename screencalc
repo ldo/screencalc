@@ -184,7 +184,7 @@ paramdefs = \
                 "parse" : parse_int,
                 "calculate" :
                     {
-                        ("aspect", "widthpx") : lambda a, w : w / a.denominator * a.numerator,
+                        ("aspect", "widthpx") : lambda a, w : round(w / a.denominator * a.numerator),
                         ("density", "height") : lambda d, h : int(h * d),
                     },
             },
@@ -205,7 +205,7 @@ paramdefs = \
                 "parse" : parse_int,
                 "calculate" :
                     {
-                        ("aspect", "heightpx") : lambda a, h : h / a.numerator * a.denominator,
+                        ("aspect", "heightpx") : lambda a, h : round(h / a.numerator * a.denominator),
                         ("density", "width") : lambda d, w : int(w * d),
                     },
             },
