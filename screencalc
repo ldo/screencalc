@@ -19,12 +19,14 @@
 #     --heightpx=n
 #     --widthpx=n
 #          screen height, width in integer pixels
+#     --pixels=n
+#          total number of pixels on screen
 #
 # Combinations which will work are:
 #     * any 2 of (aspect, diagonal, height, width) plus any 1 of
-#       (density, distance, heightpx, widthpx)
-#     * aspect + (density or distance) + (heightpx or widthpx)
-#     * both of (heightpx, widthpx) and one of (density, distance)
+#       (density, distance, heightpx, pixels, widthpx)
+#     * aspect + (density or distance) + (heightpx or pixels or widthpx)
+#     * two of (heightpx, pixels, widthpx) and one of (density, distance)
 # Discrepancies are not checked if you overspecify.
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
@@ -184,8 +186,18 @@ paramdefs = \
                 "parse" : parse_int,
                 "calculate" :
                     {
+                        ("aspect", "pixels") : lambda a, p : round(math.sqrt(p * float(a))),
                         ("aspect", "widthpx") : lambda a, w : round(w / a.denominator * a.numerator),
                         ("density", "height") : lambda d, h : int(h * d),
+                        ("pixels", "widthpx") : lambda p, w : p // w,
+                    },
+            },
+        "pixels" :
+            {
+                "parse" : parse_int,
+                "calculate" :
+                    {
+                        ("heightpx", "widthpx") : lambda w, h : w * h,
                     },
             },
         "width" :
@@ -206,7 +218,9 @@ paramdefs = \
                 "calculate" :
                     {
                         ("aspect", "heightpx") : lambda a, h : round(h / a.numerator * a.denominator),
+                        ("aspect", "pixels") : lambda a, p : round(math.sqrt(p / float(a))),
                         ("density", "width") : lambda d, w : int(w * d),
+                        ("pixels", "heightpx") : lambda p, h : p // h,
                     },
             },
     }
