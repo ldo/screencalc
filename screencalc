@@ -198,7 +198,7 @@ paramdefs = \
                 "parse" : parse_int,
                 "calculate" :
                     {
-                        ("heightpx", "widthpx") : lambda w, h : w * h,
+                        ("heightpx", "widthpx") : lambda h, w : h * w,
                     },
             },
         "width" :
