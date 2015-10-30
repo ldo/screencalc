@@ -29,13 +29,11 @@
 #     * two of (heightpx, pixels, widthpx) and one of (density, distance)
 # Discrepancies are not checked if you overspecify.
 #
-# Copyright 2013, 2014 by Lawrence D’Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2013-2015 by Lawrence D’Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
 import sys
-from functools import \
-    reduce
 import math
 from fractions import \
     Fraction
@@ -258,14 +256,7 @@ while True :
                     undone.add(param)
                     break
                 #end if
-                if (
-                    reduce
-                      (
-                        lambda a, b : a and b,
-                        (params[k] != None for k in trythis),
-                        True
-                      )
-                ) :
+                if all(params[k] != None for k in trythis) :
                     # have all values needed to use this calculation
                     params[param] = calculate[trythis](*tuple(params[k] for k in trythis))
                     did_one = True
